@@ -136,11 +136,10 @@ def add_inventory_csv():
             product_price = clean_price(product_price)
             product_quantity = clean_qty(row[2])
             date_updated = clean_date(row[3])
-            brand_name = row[4]
             get_brand_id = session.query(Brands).filter(Brands.brand_name==row[4]).first()
             brand_id = get_brand_id.brand_id
             new_product = Product(product_name=product_name, product_price=product_price,  
-                                  product_quantity=product_quantity, date_updated=date_updated, brand_name=brand_name, brand_id=brand_id)
+                                  product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
             session.add(new_product)
         session.commit()
 
