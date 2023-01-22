@@ -143,7 +143,36 @@ def add_inventory_csv():
             session.add(new_product)
         session.commit()
 
+def select_brand():
+    brands = session.query(Brands.brand_id, Brands.brand_name)
+    brand_lst = [value for value, in session.query(Brands.brand_id).all()]
+    print("\nPlease choose from the following brands:")
+    for brand in brands:
+        id = brand[0]
+        name = brand[1]
+        print(f'{id}, {name}')
+    while True:
+        brand_select = input("Select the number for the brand or press 0 if the brand is not listed\n")
+        try:
+            brand_id = int(brand_select)
+            if brand_id in brand_lst:
+                return brand_id
+            elif brand_id == 0:
+                brand_name = input("what is the brand name? ")
+                new_brand = Brands(brand_name=brand_name)
+                session.add(new_brand)
+                session.commit()
+                print(f"{brand_name} was succesfully added")
+                time.sleep(1.5)
+                return new_brand.brand_id
+            else:
+                print("Please select a number from the list")
+                continue
+        except ValueError:
+            print("Please select a number from the list")
+            continue
 
+       
 def app():
     app_running = True
     while app_running:
@@ -173,8 +202,8 @@ def app():
                 if type(date_updated) == datetime.date:
                     date_error = False
 
-            brand_name = input('Brand name: ')
-            brand_id = session.query(Brands).filter(Brands.brand_name == brand_name).first().brand_id
+            
+            brand_id = select_brand()
             new_product = Product(product_name=product_name, product_price=product_price,
                                 product_quantity=product_quantity, date_updated=date_updated,
                                 brand_id=brand_id)
@@ -239,6 +268,15 @@ def app():
                                     'product_quantity':product.product_quantity,
                                     'date_updated': product.date_updated,
                                     'brand_id': product.brand_id})
+
+            with open('backup_brands.csv', 'a') as csvfile:
+                fieldnames = ['brand_id', 'brand_name']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+                writer.writeheader()
+                for brand in session.query(Brands):
+                    writer.writerow({'brand_id': brand.brand_id,
+                                    'brand_name': brand.brand_name})                        
                 
             print('\nBackup File Created!')
             time.sleep(1.5)
